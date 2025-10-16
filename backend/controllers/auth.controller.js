@@ -1,0 +1,68 @@
+import bcrypt from "bcryptjs";
+import User from "../models/user.model.js";
+import jwt from "jsonwebtoken";
+
+export async function signup(req,res){
+    try {
+        const {name, username, email, password} = req.body;
+
+        // EMAIL ALREADY EXISTS?
+        const existingEmail = await User.findOne({email});
+        if (existingEmail){
+            return res.status(400).json({success:false, message: "Email already exists"});
+        };
+
+        // USERNAME ALREADY EXISTS?
+        const existingUsername = await User.findOne({username});
+        if (existingUsername){
+            return res.status(400).json({success:false, message: "Username already exists"});
+        };
+
+        // MISSING FIELDS
+        if (!name || !username || !email || !password) {
+            return res.status(400).json({success:false, message: "All fields are required"});
+        };
+
+        // PASSWORD LENGTH
+        if (password.length < 6) {
+            return res.status(400).json({success:false, message: "Password must be at least 6 characters"});
+        };
+
+        // HASH PASSWORD
+        const salt = await bcrypt.genSalt(10);
+        const hashed_password = await bcrypt.hash(password, salt);
+
+        // SAVE USER
+        const user = new User({name, username, email, password:hashed_password});
+        await user.save();
+
+        // GENERATE TOKEN
+        const token = jwt.sign({userId: user._id}, process.env.JWT_SECRET, {
+            expiresIn: "3d"
+        });
+
+        // SET COOKIE
+        res.cookie("jwt-linkedin", token, {
+            httpOnly: true,
+            maxAge: 3 * 24 * 60 * 60 * 1000,
+            sameSite: "strict",
+            secure: process.env.NODE_ENV === "production"
+        });
+
+        res.status(201).json({success:true, message: "User registered successfully"});
+
+        // todo: Send welcome email
+
+    } catch (error) {
+        console.log("Error in signup:", error.message);
+        res.status(500).json({success:false, message: "Internal Server Error"});
+    }
+};
+
+export function login(req,res){
+    console.log("login!")
+};
+
+export function logout(req,res){
+    console.log("logout!")
+};
