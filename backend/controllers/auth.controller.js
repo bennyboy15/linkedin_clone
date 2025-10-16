@@ -6,6 +6,11 @@ export async function signup(req,res){
     try {
         const {name, username, email, password} = req.body;
 
+        // MISSING FIELDS
+        if (!name || !username || !email || !password) {
+            return res.status(400).json({success:false, message: "All fields are required"});
+        };
+
         // EMAIL ALREADY EXISTS?
         const existingEmail = await User.findOne({email});
         if (existingEmail){
@@ -16,11 +21,6 @@ export async function signup(req,res){
         const existingUsername = await User.findOne({username});
         if (existingUsername){
             return res.status(400).json({success:false, message: "Username already exists"});
-        };
-
-        // MISSING FIELDS
-        if (!name || !username || !email || !password) {
-            return res.status(400).json({success:false, message: "All fields are required"});
         };
 
         // PASSWORD LENGTH
@@ -51,7 +51,14 @@ export async function signup(req,res){
 
         res.status(201).json({success:true, message: "User registered successfully"});
 
-        // todo: Send welcome email
+        // SEND WELCOME EMAIL
+        const profileUrl = `${process.env.CLIENT_URL}/profile/${user.username}`;
+        
+        try {
+            await sendWelcomeEmail(user.email, user.name, profileUrl);
+        } catch (error) {
+            console.log("Error sending welcome email:", error);
+        }
 
     } catch (error) {
         console.log("Error in signup:", error.message);
