@@ -1,6 +1,7 @@
 import cloudinary from "../lib/cloudinary";
 import Post from "../models/post.model";
 import Notification from "../models/notification.model";
+import {sendCommentNotificationEmail} from "../emails/emailHandlers.js";
 
 export async function getFeedPosts(req,res) {
     try {
@@ -114,7 +115,14 @@ export async function createComment(req,res) {
                 relatedPost: id
             })
             await newNotification.save();
-            // todo: Send email
+            
+            // Send Email
+            try {
+                const postUrl = process.env.CLIENT_URL + "/post/" + postId;
+                await sendCommentNotificationEmail(post.author.email, post.author.name, req.user.name, postUrl, content);
+            } catch (error) {
+                console.log("Error in sending comment notification email", error);
+            }
         };
 
         res.status(200).json(post);
@@ -123,4 +131,39 @@ export async function createComment(req,res) {
         console.log("Error in createComment post controller:", error.message);
         res.status(500).json({success:false, message: "Internal Server Error"});
     }
-}
+};
+
+export async function likePost(req,res) {
+    try {
+        const {id} = req.params;
+        const post = await Post.findById(id);
+        const userId = req.user._id;
+
+        if (post.likes.includes(userId)) {
+            // unlike the post
+            post.likes = post.likes.filter(id => id.toString() !== userId.toString());
+        } else {
+            // like the post
+            post.likes.push(userId);
+
+            // create notification if the post owner is not the person who liked
+            if (post.author.toString() !== userId.toString()) {
+                const newNotification = new Notification({
+                    recipient: post.author,
+                    type: "like",
+                    relatedUser: userId,
+                    relatedPost: id
+                });
+                await newNotification.save();
+            };
+        };
+
+        await post.save();
+
+        res.status(200).json(post);
+
+    } catch (error) {
+        console.log("Error in likePost post controller:", error.message);
+        res.status(500).json({success:false, message: "Internal Server Error"});
+    }
+};
