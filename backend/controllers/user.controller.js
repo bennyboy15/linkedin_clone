@@ -70,4 +70,4 @@ export async function updateProfile(req,res) {
         console.log("Error in updateProfile user controller:", error.message);
         res.status(500).json({success:false, message: "Internal Server Error"});
     }
-}
+};
