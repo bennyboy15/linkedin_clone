@@ -116,4 +116,4 @@ export async function getCurrentUser(req,res) {
         console.log("Error in getCurrentUser controller:", error.message);
         res.status(500).json({success:false, message: "Internal Server Error"});
     }
-}
+};
