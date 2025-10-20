@@ -1,37 +1,36 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { axiosInstance } from "../lib/axios.js";
+import { axiosInstance } from "../../lib/axios";
 import { Link } from "react-router-dom";
 import { Bell, Home, LogOut, User, Users } from "lucide-react";
 
-export default function Navbar() {
+const Navbar = () => {
+	const { data: authUser } = useQuery({ queryKey: ['authUser'] });
+	const queryClient = useQueryClient();
 
-  const { data: authUser } = useQuery({ queryKey: ["authUser"] });
-  const queryClient = useQueryClient()
+	const { data: notifications } = useQuery({
+		queryKey: ["notifications"],
+		queryFn: async () => axiosInstance.get("/notifications"),
+		enabled: !!authUser,
+	});
 
-  const {data: notifications} = useQuery({
-    queryKey: ["notifications"],
-    queryFn: async () => {axiosInstance.get("/notifications");},
-    enabled: !!authUser, //bang bang = only try if we have an authUser
-  });
+	const { data: connectionRequests } = useQuery({
+		queryKey: ["connectionRequests"],
+		queryFn: async () => axiosInstance.get("/connections/requests"),
+		enabled: !!authUser,
+	});
 
-  const {data: connectionRequests} = useQuery({
-    queryKey: ["connectionRequests"],
-    queryFn: async () => {axiosInstance.get("/connections/requests");},
-    enabled: !!authUser, //bang bang = only try if we have an authUser
-  });
+	const { mutate: logout } = useMutation({
+		mutationFn: () => axiosInstance.post("/auth/logout"),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['authUser'] });
+		},
+	});
 
-  const {mutate:logout} = useMutation({
-    mutationFn: () => axiosInstance.post("/auth/logout"),
-    onSuccess: () => {
-      queryClient.invalidateQueries({queryKey: ["authUser"]}) // on logout, refetch this query
-    }
-  });
+	const unreadNotificationCount = notifications?.data.filter((notif) => !notif.read).length;
+	const unreadConnectionRequestsCount = connectionRequests?.data?.length;
 
-  const unreadNotificationCount = notifications?.data.filter(item => !item.read).length;
-  const unreadConnectionRequestsCount = connectionRequests?.data.length;
-
-  return (
-    <nav className='bg-secondary shadow-md sticky top-0 z-10'>
+	return (
+		<nav className='bg-secondary shadow-md sticky top-0 z-10'>
 			<div className='max-w-7xl mx-auto px-4'>
 				<div className='flex justify-between items-center py-3'>
 					<div className='flex items-center space-x-4'>
@@ -99,6 +98,6 @@ export default function Navbar() {
 				</div>
 			</div>
 		</nav>
-  )
-}
-
+	);
+};
+export default Navbar;
