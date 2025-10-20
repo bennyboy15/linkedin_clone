@@ -1,4 +1,4 @@
-import { sendConnectionAcceptedEmail } from "../emails/emailHandlers";
+import { sendConnectionAcceptedEmail } from "../emails/emailHandlers.js";
 import ConnectionRequest from "../models/connectionRequest.model.js";
 import Notification from "../models/notification.model.js";
 import User from "../models/user.model.js";
