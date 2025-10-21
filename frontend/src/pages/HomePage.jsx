@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar';
 import PostCreation from '../components/PostCreation';
 import Post from '../components/Post';
 import RecommendedUser from '../components/RecommendedUser';
+import {Users} from "lucide-react"
 
 function HomePage() {
 

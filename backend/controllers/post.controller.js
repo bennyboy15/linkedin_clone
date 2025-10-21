@@ -107,7 +107,7 @@ export async function createComment(req,res) {
         .populate("author", "name email username headline profilePicture");
 
         // Create a notification if comment owner is not the post owner
-        if (post.author.toString() !== req.user._id.toString()) {
+        if (post.author._id.toString() !== req.user._id.toString()) {
             const newNotification = new Notification({
                 recipient: post.author,
                 type: "comment",

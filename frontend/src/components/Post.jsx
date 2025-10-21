@@ -12,7 +12,7 @@ function Post({ post }) {
     const { data: authUser } = useQuery({ queryKey: ["authUser"] });
 
     const [showComments, setShowComments] = useState(false);
-    const [newComment, setNewComment] = useState(false);
+    const [newComment, setNewComment] = useState("");
     const [comments, setComments] = useState(post.comments || []);
     const isOwner = authUser._id === post.author._id;
     const isLiked = post.likes.includes(authUser._id);
@@ -167,12 +167,12 @@ function Post({ post }) {
 							value={newComment}
 							onChange={(e) => setNewComment(e.target.value)}
 							placeholder='Add a comment...'
-							className='flex-grow p-2 rounded-l-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary'
+							className='flex-grow p-2 pl-4 rounded-l-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary'
 						/>
 
 						<button
 							type='submit'
-							className='bg-primary text-white p-2 rounded-r-full hover:bg-primary-dark transition duration-300'
+							className='bg-primary text-white p-2.5 rounded-r-full hover:bg-primary-dark transition duration-300'
 							disabled={isCreatingComment}
 						>
 							{isCreatingComment ? <Loader size={18} className='animate-spin' /> : <Send size={18} />}
