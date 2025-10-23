@@ -4,6 +4,7 @@ import HomePage from "./pages/HomePage.jsx";
 import SignUpPage from "./pages/auth/SignUpPage.jsx";
 import LoginPage from "./pages/auth/LoginPage.jsx";
 import PostPage from "./pages/PostPage.jsx";
+import ProfilePage from "./pages/ProfilePage.jsx";
 import NetworkPage from "./pages/NetworkPage.jsx";
 import NotificationsPage from "./pages/NotificationsPage.jsx";
 import { Toaster } from "react-hot-toast";
@@ -44,6 +45,7 @@ function App() {
         <Route path={"/notifications"} element={authUser ? <NotificationsPage /> : <Navigate to={"/login"} />} />
         <Route path={"/network"} element={authUser ? <NetworkPage /> : <Navigate to={"/login"} />} />
         <Route path={"/post/:postId"} element={authUser ? <PostPage /> : <Navigate to={"/login"} />} />
+        <Route path={"/profile/:username"} element={authUser ? <ProfilePage /> : <Navigate to={"/login"} />} />
       </Routes>
       <Toaster />
     </Layout>
